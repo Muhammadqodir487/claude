@@ -136,3 +136,31 @@ falls under; when a pass has spare capacity, check the mapping for a
 catalog code with no mapped topic yet and treat that as a real scope gap
 to prioritize — the OWASP catalogs are a coverage checklist, not just a
 citation source.
+
+## 9. Bilingual documentation (English + Uzbek)
+
+The user reads the KB in both English and Uzbek. Every document that
+carries prose content keeps a parallel Uzbek translation alongside the
+English original, in the same record rather than a separate file/doc:
+- `meta/charter` — `content` (English, authoritative for wording changes)
+  plus `content_uz` (full Uzbek translation, kept in sync).
+- `meta/index` — `content` plus `content_uz`.
+- `topics` collection — `title`/`content` (English) plus `title_uz`/
+  `content_uz` (Uzbek). Translate the full 15-section write-up, not a
+  summary — technical terms, CVE IDs, code, and URLs stay as-is (untranslated) inside the
+  translated prose; only the surrounding natural-language explanation is
+  translated.
+- `incidents` collection — `title`/`summary` plus `title_uz`/`summary_uz`.
+
+English is authoritative: when editing existing content, update the
+English first, then update the matching Uzbek translation in the same
+write (or, if that's not practical in one pass, flag it — e.g. via the
+update log — as translation-pending rather than letting it silently
+drift out of sync). A new topic/incident is not "done" until both
+language fields are populated; a pass that only writes the English half
+should say so explicitly in its final report rather than reporting the
+work as complete. Official framework/standard terminology (OWASP catalog
+codes and titles, CVE IDs, protocol/spec names) is not translated — it
+stays as the industry uses it in both language versions. The `meta/
+owasp_map` structured JSON is reference data, not prose, and is not
+translated.
