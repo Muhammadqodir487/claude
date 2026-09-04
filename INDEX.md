@@ -26,6 +26,16 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   (code-level compromise)
 - ai-security/mcp-tool-poisoning.md — description-level indirect prompt
   injection (reasoning-level compromise); see OWASP MCP03:2025
+- ai-security/jailbreak.md — multi-turn/multimodal/autonomous-agent
+  jailbreak research, transferability
+- web-security/graphql.md — batching/aliasing auth bypass, subscription/
+  WebSocket transport gaps (CVE-2026-32594)
+- web-security/ssti.md — engine fingerprinting → object-graph walk → RCE,
+  denylist-bypass techniques
+- bug-bounty/ai-model-vendor-jailbreak-programs.md — AI-lab jailbreak
+  disclosure programs as a bug-bounty category (Anthropic Cyber
+  Jailbreak / Claude Fable 5 case study), report template, severity
+  framework
 - cve-research/methodology.md
 
 ## Knowledge graph (cross-links between topics)
@@ -43,6 +53,10 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - MCP Tool Poisoning (description-level) → same exfiltration/unauthorized-action impact as classic indirect Prompt Injection, but via tool metadata/response content instead of RAG/document content
 - MCP rug-pull (definition changes post-approval) → persistent covert agent access, distinct from one-time supply-chain compromise
 - SonicWall SMA1000 SSRF + OS command injection (CVE-2026-83548/83549) → chained appliance compromise, same vendor/product line
+- GraphQL subscription/WebSocket transport → same auth-bypass root cause as MCP transport-specific gaps (middleware wired into one transport, not re-verified on another)
+- SSTI → RCE (near-immediate, unlike most injection classes) via template-engine object-graph traversal (Python __mro__, Java reflection)
+- LLM Jailbreak (direct, user-driven) → distinct from indirect Prompt Injection, but chains with it when injected third-party content itself carries a jailbreak payload
+- AI-lab jailbreak disclosure programs (bug-bounty/ai-model-vendor-jailbreak-programs.md) → require demonstrating capability uplift beyond public tools, not just successful refusal bypass
 
 ## Update log
 - 2026-09-03: Initial scaffold + 5 seed documents created.
@@ -65,3 +79,18 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   found NOT to actually exist (no cron job present) — recreate it if
   continuous unattended updates are wanted; otherwise this KB grows via
   on-demand research passes like this one.
+- 2026-09-04 (session 2): KB converted to a git repo, pushed to
+  https://github.com/Muhammadqodir487/claude. Attempted to set up a real
+  daily cloud routine (RemoteTrigger/`schedule` skill) — blocked by a
+  claude.ai/code/routines UI bug ("Select a repository" unresponsive);
+  filed as feedback, not yet resolved. Added web-security/graphql.md
+  (CVE-2026-32594 Parse Server WebSocket auth bypass, neo4j/graphql
+  subscription JWT bypass, Shopify BOLA bounty), web-security/ssti.md
+  (Jinja2/FreeMarker RCE chains, pipe-filter/hex-encoding bypasses),
+  ai-security/jailbreak.md (2026 Nature Communications autonomous
+  AI-to-AI jailbreak study, JBFuzz, SequentialBreak, multimodal
+  jailbreaks), and bug-bounty/ai-model-vendor-jailbreak-programs.md
+  (documents Anthropic's Cyber Jailbreak/Fable-5 HackerOne program as a
+  new bug-bounty category, with report template and severity framework
+  — documentation only, no live jailbreak attempts were made against
+  any Claude model per this KB's own scope).
