@@ -36,6 +36,10 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   disclosure programs as a bug-bounty category (Anthropic Cyber
   Jailbreak / Claude Fable 5 case study), report template, severity
   framework
+- web-security/deserialization.md — gadget chains (Java/PHP/Python/.NET),
+  SharePoint ToolShell (CVE-2025-53770)
+- web-security/race-conditions.md — single-packet attack, state-machine
+  races, RoguePlanet Defender TOCTOU (CVE-2026-50656)
 - cve-research/methodology.md
 
 ## Knowledge graph (cross-links between topics)
@@ -57,6 +61,9 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - SSTI → RCE (near-immediate, unlike most injection classes) via template-engine object-graph traversal (Python __mro__, Java reflection)
 - LLM Jailbreak (direct, user-driven) → distinct from indirect Prompt Injection, but chains with it when injected third-party content itself carries a jailbreak payload
 - AI-lab jailbreak disclosure programs (bug-bounty/ai-model-vendor-jailbreak-programs.md) → require demonstrating capability uplift beyond public tools, not just successful refusal bypass
+- Deserialization gadget chains → RCE via legitimate-but-combined classes (same "trusted primitives, untrusted combination" pattern as Prototype Pollution → RCE gadgets)
+- Race Conditions (TOCTOU) → not web-specific: same check-then-act flaw pattern defeats privileged OS security software (RoguePlanet/Defender) as defeats web coupon/limit logic
+- Single-packet attack (network-jitter elimination) → turns previously-unreliable remote races into reliably exploitable local-grade races, expanding real-world race-condition attack surface
 
 ## Update log
 - 2026-09-03: Initial scaffold + 5 seed documents created.
@@ -94,3 +101,9 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   new bug-bounty category, with report template and severity framework
   — documentation only, no live jailbreak attempts were made against
   any Claude model per this KB's own scope).
+- 2026-09-04 (session 3): Added web-security/deserialization.md
+  (Java/PHP/Python/.NET gadget chains, SharePoint ToolShell
+  CVE-2025-53770, ysoserial tooling) and web-security/race-conditions.md
+  (James Kettle's single-packet attack technique, RoguePlanet Microsoft
+  Defender TOCTOU LPE CVE-2026-50656, state-machine race framing beyond
+  simple limit-overrun).
