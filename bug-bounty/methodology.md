@@ -48,6 +48,68 @@ vulnerability class (see `web-security/` for those).
    run both technically (less noise, less risk of appearing as an
    attack) and program-compliance-wise.
 
+## Recon: Certificate-Transparency-Based Internal Surface Discovery
+A single crt.sh query (`https://crt.sh/?q=%25.<target>.com&output=json`,
+fully passive — no probe ever reaches the target) against a company with
+a wildcard-scoped program routinely surfaces far more than customer-
+facing subdomains. Real-world pattern observed against a fintech target
+(2026-09): the query returned hundreds of entries revealing two distinct
+high-value categories beyond the obvious `www`/`app`/`api` hosts:
+- **Internal DevOps/data tooling under a `devops.cluster.*` or
+  `*.cluster.*` naming convention**: Retool, Apache Superset, ClickHouse,
+  Meltano/Airbyte, Rancher (Kubernetes management), n8n (workflow
+  automation), 1Password SCIM — every one of these, if actually
+  internet-reachable without auth, is a critical-severity finding
+  (direct data access, K8s cluster control, or arbitrary workflow/code
+  execution). **Always verify reachability before reporting anything**:
+  in the observed case, most timed out at the TCP level (properly
+  firewalled to internal-only) and the rest returned 403 from the reverse
+  proxy (likely IP-allowlisted) — i.e., good security posture, not a
+  finding. Never attempt to bypass such a 403/firewall (header spoofing,
+  IP-allowlist bypass attempts) — that crosses from passive recon into
+  active intrusion against infrastructure outside the product's own
+  attack surface, and is a judgment call to raise with the program, not
+  act on unilaterally.
+- **CI/CD ephemeral PR-preview environments**, named after developer
+  branch names (`<developer-initials-or-name>.<service>.uat.cluster.*`)
+  or feature/ticket slugs (`fix-co-owner-page.*`,
+  `checkunderwritinginfochanged.*`, `store-document-versions.*`). Even
+  without touching a single one, the *names alone* leak: engineer
+  identities, in-development feature names, and business-logic hints
+  (e.g., a slug naming a specific access-control code path under active
+  development) — useful context for prioritizing what business-logic
+  areas to test once inside the real app, and a mild information-
+  disclosure observation in its own right depending on program scope
+  language.
+- **Full staging/UAT copies of the customer-facing app** (e.g.
+  `staging.my.<target>.com`, `uat.my.<target>.com`) are frequently live
+  and serve byte-identical builds to production (same content-length,
+  near-identical headers) — worth testing in parallel with production
+  for the *same* customer-facing bug classes, since a fix applied to one
+  environment doesn't always ship to the other on the same schedule, and
+  these are lower-consequence to interact with than production for
+  anything requiring account creation.
+
+Cross-check every discovered subdomain's *current* DNS resolution before
+investing further time — a large fraction of crt.sh results are
+historical certificates for now-decommissioned hosts (NXDOMAIN), not
+live attack surface. Only pursue what still resolves.
+
+## Practical Constraint: OTP/Identity-Verification-Gated Flows
+Fintech/regulated targets very commonly gate the real business-logic
+flow (loan/card application, account login) behind phone-number OTP or
+identity verification from the very first step — meaningfully testing
+past that point requires either the researcher's own real phone/identity
+(their own account, per most programs' "only interact with accounts you
+own" rule) or the target's own test-mode bypass (some staging
+environments accept a fixed test OTP for QA purposes — worth checking
+for, but don't assume one exists). A fictional/reserved test number
+(e.g. US `555-01XX` range) is useful for probing *client-side validation
+behavior only* — most modern phone-input libraries (libphonenumber-based)
+reject `555` exchange codes as invalid format before any request
+reaches the backend, so this only tells you about form validation, not
+the real submission path.
+
 ## Triage: What's Actually Worth Pursuing
 - Cross off anything in the program's explicit out-of-scope list *first*
   — it's the highest-signal document in the whole brief, because it
