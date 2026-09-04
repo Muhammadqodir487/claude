@@ -44,6 +44,10 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   discrepancies, Cloudflare Deception Armor .avif bypass
 - web-security/access-control-bola-idor.md — BOLA empirical taxonomy,
   Action-Level Object BOLA (41.7% of confirmed cases)
+- web-security/cloud-metadata-ssrf-misconfig.md — TOCTOU redirect-based
+  SSRF to cloud metadata (CVE-2026-64849 MLflow), bucket permutation
+- ai-security/rag-vector-db-attacks.md — embedding-space poisoning,
+  black-hole attack, PoisonedRAG
 - cve-research/methodology.md
 
 ## Knowledge graph (cross-links between topics)
@@ -71,6 +75,9 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - Cache key vs. origin-parsing mismatch → Cache Poisoning (stored XSS at scale) or Cache Deception (sensitive data exposure), same root cause, different direction of exploitation
 - "Unexploitable" primitive (e.g. header-only open redirect) + Cache Poisoning → stored, browser-triggerable attack (escalation pattern worth re-testing old low-severity findings against)
 - BOLA Action-Level (state-changing actions on another's object) → often chained with Race Conditions (concurrent action-level BOLA requests bypass both authorization AND rate/limit checks at once)
+- SSRF → Cloud Metadata (TOCTOU redirect bypass variant, CVE-2026-64849) → IAM credential theft → full cloud account compromise (same chain as classic SSRF, new bypass mechanism)
+- RAG/Vector-DB poisoning → Indirect Prompt Injection (persistent, corpus-level rather than single-request) → same downstream impact as MCP Tool Poisoning, different injection surface
+- Embedding-space anisotropy (black-hole attack) → broad retrieval hijacking without any natural-language-visible payload → defeats content-based/manual review entirely
 
 ## Update log
 - 2026-09-03: Initial scaffold + 5 seed documents created.
@@ -120,3 +127,12 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   web-security/access-control-bola-idor.md (arXiv 2605.25865 empirical
   BOLA taxonomy — Action-Level Object BOLA is 41.7% of confirmed cases,
   Uber Eats BOLA case study).
+- 2026-09-04 (session 5): Live bug-bounty engagement practice on two
+  authorized H1 programs (Docusign, Aven) — no reportable findings, but
+  produced a reusable CT-log-based internal-surface-discovery
+  methodology (see bug-bounty/methodology.md) from real recon against
+  Aven's wildcard scope. Also added web-security/cloud-metadata-ssrf-
+  misconfig.md (CVE-2026-64849 MLflow TOCTOU redirect SSRF to cloud
+  metadata, actively exploited for IAM credential theft) and
+  ai-security/rag-vector-db-attacks.md (PoisonedRAG, black-hole
+  embedding-space attack, RAGPoison persistent injection).
