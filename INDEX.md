@@ -49,6 +49,22 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - ai-security/rag-vector-db-attacks.md — embedding-space poisoning,
   black-hole attack, PoisonedRAG
 - cve-research/methodology.md
+- web-security/xss-csp-bypass.md — mutation XSS (mXSS) and DOM clobbering
+  as markup-survival primitives chained with CSP-defeating gadgets
+  (DOMPurify CVE-2025-26791/CVE-2025-15599/CVE-2024-45801, PortSwigger's
+  portswigger.net self-CSP-bypass case study)
+- web-security/file-upload-rce.md — extension/MIME/magic-byte trust
+  failures and archive/zip-slip patterns behind upload-to-RCE, Apache
+  Tomcat partial-PUT RCE (CVE-2025-24813) and Craft CMS pre-auth RCE
+  (CVE-2025-32432) case studies
+- web-security/saml-security.md — XML Signature Wrapping (XSW1-8) and
+  verify/parse parser-differential bugs, ruby-saml
+  (CVE-2025-25291/25292/66567/66568) and samlify (CVE-2025-47949)
+  case studies, Golden/Silver SAML
+- ai-security/llm-sandbox-escape.md — code-execution sandbox isolation
+  and egress-policy failures in AI agent tools (ChatGPT Code Interpreter
+  DNS-tunneling exfiltration, Claude Code CVE-2025-66479/CVE-2026-55607,
+  Claude Cowork "SharedRoot" host-filesystem escape)
 
 ## Knowledge graph (cross-links between topics)
 - Prototype Pollution → XSS / RCE (Node.js template engines)
@@ -78,6 +94,13 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - SSRF → Cloud Metadata (TOCTOU redirect bypass variant, CVE-2026-64849) → IAM credential theft → full cloud account compromise (same chain as classic SSRF, new bypass mechanism)
 - RAG/Vector-DB poisoning → Indirect Prompt Injection (persistent, corpus-level rather than single-request) → same downstream impact as MCP Tool Poisoning, different injection surface
 - Embedding-space anisotropy (black-hole attack) → broad retrieval hijacking without any natural-language-visible payload → defeats content-based/manual review entirely
+- Prototype Pollution → weakens a sanitizer's own internal state (DOMPurify CVE-2024-45801 depth-counter pollution) → mXSS, a third distinct outcome alongside the existing Prototype Pollution → XSS/RCE edge
+- CSP misconfiguration (existing edge) → the specific mechanism is a markup-survival primitive (mXSS/DOM clobbering) chained with a CSP-defeating gadget (allowlisted-CDN script, nonce theft via DOM query, base-uri/form-action gap) — see web-security/xss-csp-bypass.md
+- File Upload (trust in client-supplied Content-Type/extension) → RCE via web-executable upload directory or a second trusted parser (Tomcat/Craft CMS session-file deserialization) — same "attacker-controlled content fed to a trusted parser" root cause as Deserialization
+- SSRF → "import from URL" upload features are a File-Upload-RCE variant wearing an SSRF costume (fetch-side SSRF + storage-side unrestricted upload, CVE-2025-12138 pattern)
+- JWT/OAuth signature-validation bugs (alg confusion, kid injection) → SAML XML Signature Wrapping / parser-differential bugs (ruby-saml CVE-2025-25291/25292) — same "verify one representation, extract identity from a different representation" root cause across federated-identity formats
+- Prompt Injection (indirect) → LLM agent sandbox escape / code-execution abuse: injection is the near-universal trigger that gets an agent to run attacker-chosen code inside its sandbox, distinct from what happens once that code is running
+- SSRF / Cloud Metadata SSRF misconfig → LLM sandbox egress abuse: the same 169.254.169.254/internal-network target is reachable from inside an AI code-execution sandbox that permits outbound network access, unless metadata IPs are null-routed at the sandbox network-namespace level
 
 ## Update log
 - 2026-09-03: Initial scaffold + 5 seed documents created.
@@ -136,3 +159,24 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   metadata, actively exploited for IAM credential theft) and
   ai-security/rag-vector-db-attacks.md (PoisonedRAG, black-hole
   embedding-space attack, RAGPoison persistent injection).
+- 2026-09-04 (session 6): Added web-security/xss-csp-bypass.md (mutation
+  XSS and DOM clobbering as markup-survival primitives chained with
+  CSP-defeating gadgets; DOMPurify CVE-2025-26791/CVE-2025-15599/
+  CVE-2024-45801; portswigger.net's own AngularJS-allowlist CSP-bypass
+  case study), web-security/file-upload-rce.md (extension/MIME/magic-byte
+  trust failures and zip-slip; Apache Tomcat partial-PUT RCE
+  CVE-2025-24813 and Craft CMS pre-auth RCE CVE-2025-32432 case studies),
+  web-security/saml-security.md (XML Signature Wrapping XSW1-8 and
+  verify/parse parser-differential bugs; ruby-saml
+  CVE-2025-25291/25292/66567/66568 and samlify CVE-2025-47949 case
+  studies, Golden/Silver SAML), and ai-security/llm-sandbox-escape.md
+  (code-execution sandbox isolation and egress-policy failures in AI
+  agent tools; ChatGPT Code Interpreter DNS-tunneling exfiltration,
+  Claude Code CVE-2025-66479/CVE-2026-55607, Claude Cowork "SharedRoot"
+  host-filesystem escape). Note: a planned CI/CD supply-chain-security
+  topic (GitHub Actions poisoning, tj-actions CVE-2025-30066) was
+  attempted twice but both research-agent runs were blocked by Claude's
+  own real-time cyber-safeguard filter regardless of defensive framing;
+  swapped in SAML security as the fourth topic instead. Worth retrying
+  CI/CD supply chain in a future pass, possibly split into narrower
+  sub-topics to avoid the filter.
