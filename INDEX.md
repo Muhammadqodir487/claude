@@ -40,6 +40,10 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   SharePoint ToolShell (CVE-2025-53770)
 - web-security/race-conditions.md — single-packet attack, state-machine
   races, RoguePlanet Defender TOCTOU (CVE-2026-50656)
+- web-security/cache-poisoning-deception.md — CDN/origin URL-parsing
+  discrepancies, Cloudflare Deception Armor .avif bypass
+- web-security/access-control-bola-idor.md — BOLA empirical taxonomy,
+  Action-Level Object BOLA (41.7% of confirmed cases)
 - cve-research/methodology.md
 
 ## Knowledge graph (cross-links between topics)
@@ -64,6 +68,9 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - Deserialization gadget chains → RCE via legitimate-but-combined classes (same "trusted primitives, untrusted combination" pattern as Prototype Pollution → RCE gadgets)
 - Race Conditions (TOCTOU) → not web-specific: same check-then-act flaw pattern defeats privileged OS security software (RoguePlanet/Defender) as defeats web coupon/limit logic
 - Single-packet attack (network-jitter elimination) → turns previously-unreliable remote races into reliably exploitable local-grade races, expanding real-world race-condition attack surface
+- Cache key vs. origin-parsing mismatch → Cache Poisoning (stored XSS at scale) or Cache Deception (sensitive data exposure), same root cause, different direction of exploitation
+- "Unexploitable" primitive (e.g. header-only open redirect) + Cache Poisoning → stored, browser-triggerable attack (escalation pattern worth re-testing old low-severity findings against)
+- BOLA Action-Level (state-changing actions on another's object) → often chained with Race Conditions (concurrent action-level BOLA requests bypass both authorization AND rate/limit checks at once)
 
 ## Update log
 - 2026-09-03: Initial scaffold + 5 seed documents created.
@@ -107,3 +114,9 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   (James Kettle's single-packet attack technique, RoguePlanet Microsoft
   Defender TOCTOU LPE CVE-2026-50656, state-machine race framing beyond
   simple limit-overrun).
+- 2026-09-04 (session 4): Added web-security/cache-poisoning-deception.md
+  (CDN/origin URL-parsing discrepancies per PortSwigger's "Gotta cache
+  'em all," Cloudflare Deception Armor .avif bypass) and
+  web-security/access-control-bola-idor.md (arXiv 2605.25865 empirical
+  BOLA taxonomy — Action-Level Object BOLA is 41.7% of confirmed cases,
+  Uber Eats BOLA case study).
