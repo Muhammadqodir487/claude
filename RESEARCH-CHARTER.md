@@ -83,12 +83,56 @@ References.
 
 ## 6. Continuous operation
 
-A scheduled routine (see repo root / claude.ai/code/routines) runs
-periodically: pulls the repo, reads this charter + `INDEX.md`, picks 1-3
-uncovered or stale topics (checking off the Scope list above and the
-Sources list for anything new), does a real research pass (WebSearch/
-WebFetch), writes files per the template, updates `INDEX.md` (file list +
-knowledge graph + update log), commits, and pushes. If the routine is ever
-found not to be firing, treat that as a bug to fix, not a reason to lower
-scope — this charter's scope stands regardless of which mechanism (manual
-session or scheduled routine) is currently executing it.
+The primary, cross-session copy of this KB lives in a published Claude
+Artifact's shared database (see the Claude memory pointer for the URL) —
+not this git repo. A scheduled cloud routine (claude.ai/code/routines) runs
+daily: reads `meta/charter` + `meta/index` + all `topics` docs from that
+artifact db, picks 1-3 uncovered or stale topics (checking off the Scope
+list above and the Sources list for anything new), does a real research
+pass (WebSearch/WebFetch), writes new `topics` docs per the template in
+section 5, and updates `meta/index` (file list + knowledge graph + update
+log). This git repo (`~/security-research-kb/`, pushed to GitHub) is a
+secondary/legacy copy kept in sync manually — it does not update itself,
+so don't assume it's current; treat the artifact db as authoritative. If
+the routine is ever found not to be firing, treat that as a bug to fix, not
+a reason to lower scope — this charter's scope stands regardless of which
+mechanism (manual session or scheduled routine) is currently executing it.
+
+## 7. Emerging incident tracking
+
+Beyond the deep-dive topic files (section 5's 15-section template, meant
+for stable, well-established techniques), the KB also keeps a lightweight,
+frequently-updated **incident feed** for newly disclosed vulnerabilities
+and active/ongoing cyberattacks — the "what just happened" layer, distinct
+from the "how the technique works" layer. Each incident entry is short:
+date, title, one-paragraph summary, CVE id(s) if any, real source URL(s),
+and (optionally) which existing topic file it relates to or extends. A
+routine or manual pass should add an incident entry whenever it finds a
+genuinely new, real, dated disclosure (a fresh CVE, an active KEV addition,
+a breaking bug-bounty writeup, a live attack campaign) — even one not yet
+worth a full topic file. When an incident matures into a well-documented
+pattern worth deep methodology extraction, promote it into a real
+section-5 topic file (and note the promotion in the incident entry and the
+update log) rather than duplicating the content in both places.
+
+## 8. OWASP alignment
+
+The KB explicitly tracks and maps its coverage against the standing OWASP
+Top-10-style catalogs relevant to its scope:
+- **OWASP Top 10 (Web Application Security)** — A01 Broken Access Control
+  through A10 Server-Side Request Forgery.
+- **OWASP API Security Top 10** — API1 Broken Object Level Authorization
+  through API10.
+- **OWASP Top 10 for LLM Applications** — LLM01 Prompt Injection through
+  LLM10, covering the ai-security scope.
+- **OWASP MCP Top 10 / MCP security guidance** (e.g. MCP03:2025 tool
+  poisoning, already referenced in `ai-security/mcp-tool-poisoning.md`) —
+  covering MCP-specific agent/tool-security scope.
+
+A mapping of KB topics to these catalog codes is maintained as structured
+data alongside `meta/index` (not duplicated as prose in every topic file).
+When a new topic is added, map it to the relevant catalog code(s) it
+falls under; when a pass has spare capacity, check the mapping for a
+catalog code with no mapped topic yet and treat that as a real scope gap
+to prioritize — the OWASP catalogs are a coverage checklist, not just a
+citation source.
