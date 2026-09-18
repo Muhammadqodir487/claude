@@ -65,6 +65,13 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   and egress-policy failures in AI agent tools (ChatGPT Code Interpreter
   DNS-tunneling exfiltration, Claude Code CVE-2025-66479/CVE-2026-55607,
   Claude Cowork "SharedRoot" host-filesystem escape)
+- ai-security/ai-browser-agents.md — agentic browser attack class (Comet,
+  ChatGPT Atlas, Fellou, Copilot for Edge, Gemini for Chrome): indirect
+  prompt injection where the agent holds the user's full authenticated
+  sessions; Brave Comet summarize→OTP exfil, CometJacking one-click URL,
+  ChatGPT Tainted Memories (CSRF→persistent memory), Zenity calendar-invite
+  filesystem/password-manager takeover, Cato HashJack URL-fragment
+  injection, CSA PleaseFix zero-/one-click taxonomy
 
 ## Knowledge graph (cross-links between topics)
 - Prototype Pollution → XSS / RCE (Node.js template engines)
@@ -101,6 +108,12 @@ Related Research, Practical Hunting Tips, Real World Examples, References
 - JWT/OAuth signature-validation bugs (alg confusion, kid injection) → SAML XML Signature Wrapping / parser-differential bugs (ruby-saml CVE-2025-25291/25292) — same "verify one representation, extract identity from a different representation" root cause across federated-identity formats
 - Prompt Injection (indirect) → LLM agent sandbox escape / code-execution abuse: injection is the near-universal trigger that gets an agent to run attacker-chosen code inside its sandbox, distinct from what happens once that code is running
 - SSRF / Cloud Metadata SSRF misconfig → LLM sandbox egress abuse: the same 169.254.169.254/internal-network target is reachable from inside an AI code-execution sandbox that permits outbound network access, unless metadata IPs are null-routed at the sandbox network-namespace level
+- Indirect Prompt Injection (ai-security/prompt-injection.md) → AI Browser Agent is its highest-impact deployment: the agent runs with the user's full set of live authenticated web sessions + connected accounts, so a single injection becomes cross-origin account-takeover/data-exfil at browser scope — the general mechanism, maximally privileged (see ai-security/ai-browser-agents.md)
+- AI Browser Agent → Confused Deputy (same root cause as SSRF, web-security/ssrf.md): the deputy is the browser and the "credential" it wrongly lends the attacker is the user's entire logged-in session set, not one server-side fetch capability
+- CSRF (classic web) + LLM persistent memory → "Tainted Memories" memory poisoning: CSRF regains first-class relevance as the *write* primitive that plants a durable prompt injection into account-level memory, persisting across sessions/devices/browsers — bridges web-security (CSRF) and ai-security (memory poisoning), and is the persistence analogue of RAG/vector-DB corpus poisoning (ai-security/rag-vector-db-attacks.md)
+- HashJack URL-fragment injection → server never sees the payload (client-only `#fragment`), bypassing WAF/IPS/DLP/server logs — same server-invisible property as DOM-based XSS (web-security/xss-csp-bypass.md), applied to LLM ingestion instead of the JS sink
+- Screenshot / faint-text / "unseeable" injection → multimodal indirect prompt injection: content invisible to humans but read by OCR/vision, extending the multimodal-jailbreak edge (ai-security/jailbreak.md) to the browser-agent surface; "if a human can't see it" is not a trust boundary
+- AI Browser Agent exfiltration channels (agent posts back to source platform / background-fetches an attacker URL with data as params / renders an attacker link, often base64-encoded to defeat output filters) → same out-of-band exfil pattern as markdown/image-render leakage in ai-security/llm-sandbox-escape.md; output content filters are bypassed by any encoding the model will apply
 
 ## Update log
 - 2026-09-03: Initial scaffold + 5 seed documents created.
@@ -180,3 +193,24 @@ Related Research, Practical Hunting Tips, Real World Examples, References
   swapped in SAML security as the fourth topic instead. Worth retrying
   CI/CD supply chain in a future pass, possibly split into narrower
   sub-topics to avoid the filter.
+- 2026-09-18 (session 7): Added ai-security/ai-browser-agents.md — the
+  agentic-browser attack class (Perplexity Comet, OpenAI ChatGPT Atlas
+  [retired 2026-08-09], Fellou, Microsoft Copilot for Edge, Google Gemini
+  for Chrome). Root cause: the LLM ingests attacker-controlled web content
+  into the same context as the user's instruction while holding the user's
+  full authenticated browser identity (confused deputy at browser scope).
+  Real 2025-2026 disclosures: Brave's Comet summarize→OTP-theft (Reddit
+  spoiler-tag injection) and "unseeable" screenshot/faint-text injection;
+  LayerX CometJacking (one-click URL, base64 exfil, Perplexity triaged
+  "not applicable") and ChatGPT "Tainted Memories" (CSRF-written
+  persistent memory, OpenAI "couldn't reproduce"); Zenity Labs
+  calendar-invite filesystem exfil + password-manager takeover (fixed Feb
+  2026); Cato CTRL HashJack (URL-fragment injection, server-invisible,
+  bypasses WAF/IPS); CSA "PleaseFix" zero-/one-click exploit taxonomy
+  (Mar 2026). Added 7 knowledge-graph edges tying it to prompt-injection,
+  ssrf/confused-deputy, CSRF+memory-poisoning, DOM-XSS server-invisibility,
+  multimodal jailbreak, and llm-sandbox-escape exfil channels. Maps to
+  OWASP LLM01 (Prompt Injection) and LLM Top 10 for agentic systems.
+  NOTE: git-repo copy only carries the English write-up; the Uzbek
+  content_uz half required by charter §9 is translation-pending for the
+  authoritative artifact-db copy and has NOT been written this pass.
